@@ -52,7 +52,7 @@ public class ClientMassageDecoder extends MessageToMessageDecoder<ByteBuf> {
                     break;
             }
 
-            port = ((BidiMap)RangePort.getRangePort(entity.getPort(), entity.getRemotePort())).inverseBidiMap();
+            port = ((BidiMap)RangePort.getRangePort(entity.getLocalServer(),entity.getPort(), entity.getRemotePort())).inverseBidiMap();
             //加入总表中
             for (Object o : port.keySet()) {
                 int serverport= (Integer)o;

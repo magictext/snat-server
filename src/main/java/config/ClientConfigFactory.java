@@ -1,9 +1,9 @@
 package config;
 
-import util.Mapper;
-import util.RangePort;
 import exception.RangePortException;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
+import util.Mapper;
+import util.RangePort;
 
 import java.io.File;
 import java.util.Map;
@@ -15,17 +15,17 @@ public class ClientConfigFactory {
 
         static{
             ClientConfig config = Mapper.parseObject(new File("./target/classes/client.json"), ClientConfig.class);
-            //ourInstance= mapper.readValue(System.getProperty("user.dir")+ RemoteServerRunner.configFileSrc, ServerConfig.class);
+//            ourInstance=Mapper.parseObject(new File(System.getProperty("user.dir")+ LocalProxyRunner.configFileSrc), ClientConfig.class);
             for (ConfigEntity entity : config.getList()) {
                 Map<Integer, Integer> port = null;
                 try {
-                    port = RangePort.getRangePort(entity.getPort(), entity.getRemotePort());
+                    port = RangePort.getRangePort(entity.getLocalServer(),entity.getPort(), entity.getRemotePort());
                 } catch (RangePortException e) {
                     e.printStackTrace();
                 }
                 map.putAll(port);
-                ourInstance=config;
             }
+            ourInstance=config;
         }
 
         private static ClientConfig ourInstance ;

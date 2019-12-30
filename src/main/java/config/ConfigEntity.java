@@ -14,6 +14,8 @@ public class ConfigEntity {
 
     private String name;
 
+    private String localServer;
+
     private String port;
 
     private String remotePort;

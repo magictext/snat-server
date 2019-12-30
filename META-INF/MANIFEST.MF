@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Class-Path: lib/commons-collections-3.2.1.jar
+  lib/jackson-annotations-2.9.5.jar lib/log4j-1.2.17.jar lib/jackson-core-2.9.5.ja
+ r lib/netty-all-4.1.42.Final.jar lib/jackson-databind-2.9.5.jar lib/lombok-1.18.8.jar
+Main-Class: runner.RemoteServerRunner
+
