@@ -70,5 +70,10 @@
         <version>1.18.8</version>
     </dependency>
 
+    <dependency>
+        <groupId>xyz</groupId>
+        <artifactId>snat-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </dependency>
 </dependencies>
 </project>

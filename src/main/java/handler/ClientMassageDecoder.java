@@ -1,12 +1,14 @@
 package handler;
 
+import config.ClientConfig;
+import config.ConfigEntity;
 import io.netty.channel.Channel;
+import org.apache.commons.collections.bidimap.DualHashBidiMap;
+import runner.UdpToClient;
 import util.Data;
 import util.Mapper;
 import util.RangePort;
 import util.Type;
-import config.ClientConfig;
-import config.ConfigEntity;
 import exception.RangePortException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -16,7 +18,7 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 import map.ServerProxyMap;
 import org.apache.commons.collections.BidiMap;
 import org.apache.log4j.Logger;
-import runner.RemoteServerToClient;
+import runner.TcpToClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,51 +26,8 @@ import java.util.List;
 
 public class ClientMassageDecoder extends MessageToMessageDecoder<ByteBuf> {
 
-    //获得端口映射表
-    BidiMap port;
 
-    @Override
-    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        for (Object o : port.keySet()) {
-            int serverport= (Integer)o;
-            Channel remove = ServerProxyMap.serverProxyMap.remove(serverport);
-            Logger.getLogger(this.getClass()).debug("port : "+o+"has free");
-            remove.closeFuture().sync();
-        }
-    }
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        Logger.getLogger(this.getClass()).warn(cause.getMessage(), cause);
-    }
-
-    private void configureServerForNewClient(ClientConfig config, ChannelHandlerContext ctx) throws RangePortException {
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        List<Integer> list = new ArrayList<>();
-        for (ConfigEntity entity : config.getList()) {
-            switch (entity.getName()){
-                case "":
-                    break;
-            }
-
-            port = ((BidiMap)RangePort.getRangePort(entity.getLocalServer(),entity.getPort(), entity.getRemotePort())).inverseBidiMap();
-            //加入总表中
-            for (Object o : port.keySet()) {
-                int serverport= (Integer)o;
-                if (ServerProxyMap.serverProxyMap.containsKey(serverport)==true) {
-                    list.add(serverport);
-                } else {
-                    ServerProxyMap.serverProxyMap.put(serverport,ctx.channel());
-                    //开启serverSocket
-                    new Thread(new RemoteServerToClient((Integer) o,bossGroup, workerGroup),this.getClass().getName()+o).start();
-                }
-            }
-            if(list.size()!=0){
-                ctx.channel().writeAndFlush(new Data().setType(Type.portBindsError).setB(Mapper.getJsonByte(list)));
-            }
-        }
-    }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
@@ -81,9 +40,7 @@ public class ClientMassageDecoder extends MessageToMessageDecoder<ByteBuf> {
                 b=new byte[lenght - 4];
                 Logger.getLogger(this.getClass()).debug("the after length is : "+in.readableBytes());
                 in.readBytes(b);
-                ClientConfig config = Mapper.parseObject(b, ClientConfig.class);
-                Logger.getLogger(this.getClass()).debug("received config:   "+config);
-                configureServerForNewClient(config,ctx);
+                out.add(new Data().setType(Type.configSending).setB(b));
                 break;
             case 501:
                 b=new byte[lenght - 4];
@@ -92,15 +49,14 @@ public class ClientMassageDecoder extends MessageToMessageDecoder<ByteBuf> {
                 Logger.getLogger(this.getClass()).warn("server port: "+list.toString()+" is already in use");
                 Logger.getLogger(this.getClass()).warn("the port above has not been running");
                 break;
-            case 200:
+            case 200: case 201:
                 Data data=new Data();
-                data.setType(200).setPort(in.readInt()).setSession(in.readInt());
+                data.setType(i).setPort(in.readInt()).setSession(in.readInt());
                 b=new byte[in.readableBytes()];
                 in.readBytes(b);
                 data.setB(b);
                 out.add(data);
-                break;
-        }
+                break;}
     }
 
 }

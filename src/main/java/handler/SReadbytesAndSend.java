@@ -13,35 +13,43 @@ import org.apache.log4j.Logger;
 
 import java.net.InetSocketAddress;
 
-public class SReadbytesAndSend extends SimpleChannelInboundHandler {
+public class SReadbytesAndSend extends SimpleChannelInboundHandler<ByteBuf> {
 
     private Channel channel;
 
     private int port;
 
+    private int type=Type.date;
+
+    public SReadbytesAndSend(int port,int type){
+        this.port = port;
+        this.type = type;
+        channel=ServerProxyMap.serverProxyMap.get(port);
+        Logger.getLogger(this.getClass()).debug(channel);
+
+    }
+
+    public SReadbytesAndSend() {
+    }
+
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        channel=ServerProxyMap.serverProxyMap.get(((InetSocketAddress) ctx.channel().localAddress()).getPort());
-        port=((InetSocketAddress) ctx.channel().localAddress()).getPort();
         ServerChannelMap.serverChannelMap.put(ChannelHashcode.getChannelHashcode(ctx), ctx.channel());
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         ServerChannelMap.serverChannelMap.remove(ChannelHashcode.getChannelHashcode(ctx));
-        ctx.close().sync();
+        ctx.channel().close();
+        ctx.close();
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        ByteBuf mes = null;
-        if (msg instanceof ByteBuf) {
-            mes = (ByteBuf) msg;
-            byte b[] = new byte[mes.readableBytes()];
-            mes.readBytes(b);
-            Logger.getLogger(this.getClass()).debug(new String(b));
+    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
+            byte b[] = new byte[msg.readableBytes()];
+            msg.readBytes(b);
+            Logger.getLogger(this.getClass()).debug("I have received a request");
             channel.writeAndFlush(new Data().setType(Type.date).setSession(ChannelHashcode.getChannelHashcode(ctx)).setPort(port).setB(b));
-        }
     }
 
 }
