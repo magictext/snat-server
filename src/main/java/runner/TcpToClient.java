@@ -5,6 +5,7 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.bytes.ByteArrayDecoder;
 import io.netty.handler.codec.bytes.ByteArrayEncoder;
 import map.ServerChannelMap;
 import map.ServerProxyMap;
@@ -43,6 +44,7 @@ public class TcpToClient implements Runnable{
                  public void initChannel(SocketChannel ch) throws Exception {
                      ch.pipeline()
                              .addLast(new ByteArrayEncoder())
+                             .addLast(new ByteArrayDecoder())
                              .addLast(new SReadbytesAndSend(port, Type.date)); //处理器
                  }
              })

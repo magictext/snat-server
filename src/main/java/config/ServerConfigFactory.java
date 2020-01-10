@@ -14,9 +14,9 @@ public class ServerConfigFactory {
     static{
         ObjectMapper mapper =new ObjectMapper();
         try {
-//            ourInstance= mapper.readValue(new File("./target/classes/server.json"), ServerConfig.class);
-            Logger.getLogger("Runner").debug(System.getProperty("user.dir"));
-            ourInstance= mapper.readValue(new File(System.getProperty("user.dir")+"/"+RemoteServerRunner.configFileSrc), ServerConfig.class);
+            ourInstance= mapper.readValue(new File("./target/classes/server.json"), ServerConfig.class);
+//            Logger.getLogger("Runner").debug(System.getProperty("user.dir"));
+//            ourInstance= mapper.readValue(new File(System.getProperty("user.dir")+"/"+RemoteServerRunner.configFileSrc), ServerConfig.class);
         } catch (IOException e) {
             e.printStackTrace();
         }

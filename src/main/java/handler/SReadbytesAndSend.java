@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
 
 import java.net.InetSocketAddress;
 
-public class SReadbytesAndSend extends SimpleChannelInboundHandler<ByteBuf> {
+public class SReadbytesAndSend extends SimpleChannelInboundHandler<byte[]> {
 
     private Channel channel;
 
@@ -45,11 +45,9 @@ public class SReadbytesAndSend extends SimpleChannelInboundHandler<ByteBuf> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
-            byte b[] = new byte[msg.readableBytes()];
-            msg.readBytes(b);
+    protected void channelRead0(ChannelHandlerContext ctx, byte[] msg) throws Exception {
             Logger.getLogger(this.getClass()).debug("I have received a request");
-            channel.writeAndFlush(new Data().setType(Type.date).setSession(ChannelHashcode.getChannelHashcode(ctx)).setPort(port).setB(b));
+            channel.writeAndFlush(new Data().setType(type).setSession(ChannelHashcode.getChannelHashcode(ctx)).setPort(port).setB(msg));
     }
 
 }

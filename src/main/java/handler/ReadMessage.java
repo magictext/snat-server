@@ -73,7 +73,7 @@ public class ReadMessage extends SimpleChannelInboundHandler<Data> {
             } else {
                 ServerProxyMap.serverProxyMap.put(serverport,ctx.channel());
                 //开启serverSocket
-                new Thread(new UdpToClient((Integer) o, workerGroup),this.getClass().getName()+o).start();
+                new Thread(new UdpToClient((Integer) o, workerGroup,port),this.getClass().getName()+o).start();
             }
         }
     }
